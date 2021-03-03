@@ -382,11 +382,11 @@ class BenchmarkProcess:
 
     ############################################################################
     # (I-8) if fork and join, but no benchmark fork, append dummy benchmarkFork
-    if len(self.forkParameters) > 0 and len(self.joinParameters) > 0 \
-        and (len(self.benchmarkForkParameters) == 0 \
-        or (len(self.benchmarkForkParameters) == 1 \
-        and hasParam("ProblemSizes", self.benchmarkForkParameters)) ):
-      self.benchmarkForkParameters.append({"BenchmarkFork": [0]})
+    # if len(self.forkParameters) > 0 and len(self.joinParameters) > 0 \
+    #     and (len(self.benchmarkForkParameters) == 0 \
+    #     or (len(self.benchmarkForkParameters) == 1 \
+    #     and hasParam("ProblemSizes", self.benchmarkForkParameters)) ):
+    #   self.benchmarkForkParameters.append({"BenchmarkFork": [0]})
 
     ############################################################################
     # (I-9) if join, but no benchmark join, append dummy benchmarkJoin
@@ -711,6 +711,3 @@ class BenchmarkStep:
 
   def __repr__(self):
     return self.__str__()
-
-
-
