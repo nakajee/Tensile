@@ -3550,8 +3550,8 @@ class KernelWriter(metaclass=abc.ABCMeta):
     vwa = kernel["GlobalLoadVectorWidthA"]
     vwb = kernel["GlobalLoadVectorWidthB"]
 
-    # allow LocalReadVectorWidth for TLU + MatrixInstruction
-    self.allowLRVWforTLUandMI = kernel["allowLRVWforTLUandMI"]
+    # allow LocalReadVectorWidthB for TLUB + MatrixInstruction
+    self.allowLRVWBforTLUandMI = kernel["allowLRVWBforTLUandMI"]
 
     self.numItersPLR = kernel["PrefetchLocalRead"]%kernel["LoopIters"]
     self.numVgprBuffer = kernel["LoopIters"] if kernel["PrefetchLocalRead"] > kernel["LoopIters"] else kernel["PrefetchLocalRead"]
@@ -3560,9 +3560,9 @@ class KernelWriter(metaclass=abc.ABCMeta):
     # MergeRead 0: ds_readAx1 ds_readBx1 mfma | ds_readAx1 ds_readBx1 mfma | => ds_readAx2 ds_readBx1 mfma | ds_readBx1 mfma |
     # MergeRead 1: ds_readAx1 ds_readBx1 mfma | ds_readAx1 ds_readAx1 mfma | => ds_readAx2 ds_readBx1 ds_readBx1 mfma | mfma |
     MergeRead = 0
-    if not kernel["ProblemType"]["TLUA"] or MergeRead or self.allowLRVWforTLUandMI:
-      if (not kernel["ProblemType"]["TLUA"]) and kernel["DirectToVgprA"]:
-        # DirectToVgpr + TLU=False case, ignore LocalReadVectorWidth and use GlobalLoadVectorWidth instead.
+    if not kernel["ProblemType"]["TLUA"] or MergeRead or self.allowLRVWBforTLUandMI:
+      if kernel["DirectToVgprA"]:
+        # DirectToVgprA case, ignore LocalReadVectorWidth and use GlobalLoadVectorWidth instead.
         self.lrvwA = vwa
       else:
         self.lrvwA = kernel["LocalReadVectorWidth"]
@@ -3571,9 +3571,9 @@ class KernelWriter(metaclass=abc.ABCMeta):
         self.lrvwA = kernel["MIInputPerThread"]
       else:
         self.lrvwA = 1
-    if not kernel["ProblemType"]["TLUB"] or MergeRead or self.allowLRVWforTLUandMI:
-      if (not kernel["ProblemType"]["TLUB"]) and kernel["DirectToVgprB"]:
-        # DirectToVgpr + TLU=False case, ignore LocalReadVectorWidth and use GlobalLoadVectorWidth instead.
+    if not kernel["ProblemType"]["TLUB"] or MergeRead or self.allowLRVWBforTLUandMI:
+      if kernel["DirectToVgprB"]:
+        # DirectToVgprB case, ignore LocalReadVectorWidth and use GlobalLoadVectorWidth instead.
         self.lrvwB = vwb
       else:
         self.lrvwB = kernel["LocalReadVectorWidth"]
@@ -3604,8 +3604,9 @@ class KernelWriter(metaclass=abc.ABCMeta):
     if kernel["EnableMatrixInstruction"]:
       self.numReadsIterCoalescedA = self.lrvwA // kernel["MIInputPerThread"]
       self.numReadsIterCoalescedB = self.lrvwB // kernel["MIInputPerThread"]
-      if self.allowLRVWforTLUandMI:
-        self.numReadsIterCoalescedA = 1
+      if self.allowLRVWBforTLUandMI:
+        if kernel["ProblemType"]["TLUA"]:
+          self.numReadsIterCoalescedA = 1
         self.numReadsIterCoalescedB = 1
     else:
       self.numReadsIterCoalescedA  = 1
