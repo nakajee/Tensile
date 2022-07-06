@@ -397,8 +397,9 @@ class KernelWriter(metaclass=abc.ABCMeta):
         return max(0, _numMfmaBetweenLastLWandBarrier(spacing))
 
       numMfmaBetweenLWandBarrier = assignParamSplitLds(numMfmaBetweenLWandBarrier)
-      # In StoreCInUnroll case, reduce numMfmaBetweenLWandBarrier to 1 because interval between local write and read is already added by StoreCInUnroll code
-      if kernel["StoreCInUnroll"]:
+      # In StoreCInUnroll + num of store > 1 case, reduce numMfmaBetweenLWandBarrier to 1
+      # because interval between local write and read is already added by StoreCInUnroll code
+      if kernel["StoreCInUnroll"] and self.getNumberOfStoreCInTemplate(kernel) > 1:
         numMfmaBetweenLWandBarrier = min(numMfmaBetweenLWandBarrier, 1)
       self.lwEndMfmaIndex = max(self.barrierMfmaIndex - numMfmaBetweenLWandBarrier,0) if self.numItersPLR else numMfmaPerIter*kernel["LoopIters"] - 1
       # adjust lwEndMfmaIndex for the following cases 

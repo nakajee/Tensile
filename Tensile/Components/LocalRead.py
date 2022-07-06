@@ -229,7 +229,7 @@ class LocalReadMFMA(LocalRead):
                         if (kernel["DirectToLds%s" % tP["tensorChar"]] and  \
                             kernel["GlobalLoadVectorWidth%c"%tc] * tP["bpe"] > 4):
                           # directToLds special case
-                          divVal = 4 if kernel["ProblemType"]["DataType"].isDoubleComplex() else 2
+                          divVal = 4 if (kernel["ProblemType"]["DataType"].isDoubleComplex() or  kernel["GlobalLoadVectorWidth%c"%tc] == 4) else 2
                           rIdxMod = rIdx % divVal
                           rIdxDiv = rIdx // divVal
                           offset_val = (eIdx + (vIdx * numOffsets+oIdx) * MIWaveGroupShape[tile01]) * tileStride

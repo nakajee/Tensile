@@ -2335,7 +2335,7 @@ class Solution(collections.abc.Mapping):
 
     # Does not work with TLU = False and SGEMM/CGEMM (not supported)
     if (not state["ProblemType"]["TLU%c"%tc]) and (state["ProblemType"]["DataType"].isSingle() or state["ProblemType"]["DataType"].isSingleComplex()):
-      reject(state, "DirectToVgpr%c does not supports TLU%c = False + SGEMM"%(tc, tc))
+      reject(state, "DirectToVgpr%c does not supports TLU%c = False + SGEMM/CGEMM"%(tc, tc))
       return False
 
     # MIWaveGroup check
